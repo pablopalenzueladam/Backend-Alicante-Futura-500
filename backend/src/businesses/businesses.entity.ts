@@ -12,7 +12,7 @@ export class Business {
   @Column({ unique: true })
   email!: string;
 
-  @Column({ nullable: true })
+  @Column({ })
   phone!: string;
 
   @Column({ nullable: true })

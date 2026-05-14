@@ -31,4 +31,9 @@ export class CustomersController {
   remove(@Param('id') id: string) {
     return this.customersService.remove(+id);
   }
+
+  @Get()
+  getCustomers() {
+    return this.customersService.getCustomerWithNextAppointment();
+    }
 }

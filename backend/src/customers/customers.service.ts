@@ -51,4 +51,19 @@ export class CustomersService {
 
     return { message: `Cliente ${id} eliminado correctamente` };
   }
+
+  async getCustomerWithNextAppointment() {
+    const now = new Date();
+
+    const customers = await this.customersRepository
+      .createQueryBuilder("customer")
+      .leftJoin("customer.appointment", "appointment")
+      .addSelect("MIN(appointment.date)", "nextAppointment")
+      .where("appointment.date > :now", { now })
+      .groupBy("customer.id")
+      .getRawMany();
+
+    return customers;
+  }
+  
 }
