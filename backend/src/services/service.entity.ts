@@ -1,6 +1,6 @@
-import { Column, Entity, OneToMany, JoinColumn, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
+import { Column, Entity, OneToMany, ManyToOne, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
 import { Appointment } from '../appointments/appointment.entity';
-import { Business } from '../businesses/businesses.entity'
+import { Business } from '../businesses/business.entity';
 
 @Entity()
 export class Service {
@@ -19,8 +19,7 @@ export class Service {
   @Column()
   businessId!: number;
 
-  @OneToOne(() => Business, (business) => business.id)
-  @JoinColumn({ name: 'businessId' })
+  @ManyToOne(() => Business, (business) => business.id)
   business!: Business;
   
   @OneToMany(() => Appointment, (appointment) => appointment.service)

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { IsEmail, IsNumber,  IsOptional, IsString } from 'class-validator';
 
 export class CreateBusinessDto {
-  @ApiProperty({ example: 'Ortiz SA' })
+  @ApiProperty({ example: 'Negocio' })
   @IsString()
   name: string;
 
@@ -15,11 +15,7 @@ export class CreateBusinessDto {
   @IsString()
   phone?: string;
 
-  @ApiProperty({ example: 'Lavar dinero' })
-  @IsOptional()
-  service: string;
-
-  @ApiProperty({ example: 9999999.99})
+  @ApiProperty({ example: '3' })
   @IsNumber()
-  price: number;
+  maxCustomers?: number;
 }
