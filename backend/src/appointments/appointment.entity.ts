@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, JoinColumn, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
 import { Customer } from '../customers/customers.entity';
-import { Business } from '../businesses/businesses.entity'
+import { Service } from '../services/services.entity';
 
 export enum AppointmentStatus {
   PENDING = 'pending',
@@ -35,10 +35,12 @@ export class Appointment {
   @Column()
   businessId!: number;
 
-  @OneToOne(() => Business, (business) => business.id)
-  @JoinColumn({ name: 'businessId' })
-  business!: Business;
-
   @Column()
   serviceName!: string;
+
+  @ManyToOne(() => Service, (service) => service.name)
+  @JoinColumn({ name: 'serviceId' })
+  service!: Service;
+
+  
 } 

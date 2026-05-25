@@ -34,6 +34,6 @@ export class CustomersController {
 
   @Get()
   getCustomers() {
-    return this.customersService.getCustomerWithNextAppointment();
+    return this.customersService.getNextAppointment();
     }
 }

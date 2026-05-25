@@ -15,12 +15,12 @@ export class Business {
   @Column({ })
   phone!: string;
 
-  @Column({ nullable: true })
-  service: string;
+  @Column({ })
+  maxCustomers!: number;
 
-  @Column({ nullable: true })
-  price: number;
+  
 
   @OneToMany(() => Appointment, (appointment) => appointment.businessId)
   appointments!: Appointment[];
+
 } 
