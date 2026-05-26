@@ -17,7 +17,8 @@ import { ServicesModule } from './services/services.module';
     AppointmentsModule,
     CustomersModule,
     BusinessesModule,
-    ServicesModule
+    ServicesModule,
+  
   ],
 })
 export class AppModule {}

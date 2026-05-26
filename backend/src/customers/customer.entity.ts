@@ -9,9 +9,6 @@ export class Customer {
   @Column()
   name!: string;
 
-  @Column()
-  password!: string;
-
   @Column({ unique: true })
   email!: string;
 
@@ -21,6 +18,11 @@ export class Customer {
   @Column({ nullable: true })
   businessId!: number;
 
+  @Column()
+  password!: string;
+
   @OneToMany(() => Appointment, (appointment) => appointment.customer)
   appointments!: Appointment[];
+
+  
 } 

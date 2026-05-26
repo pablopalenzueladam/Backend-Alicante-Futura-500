@@ -5,6 +5,8 @@ import { Customer } from './customer.entity';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { GetNextAppointment } from './dto/get-next-appointment';
+import * as bcrypt from 'bcrypt';
+
 
 @Injectable()
 export class CustomersService {
@@ -21,8 +23,11 @@ export class CustomersService {
     return this.customersRepository.findOneBy({ id });
   }
 
-  create(createCustomerDto: CreateCustomerDto) {
-    const customer = this.customersRepository.create(createCustomerDto);
+  // Aquí la función de crear cliente, que hashea la contraseña que se introduzca
+  async create(createCustomerDto: CreateCustomerDto) {
+    const hashedPassword = await bcrypt.hash(createCustomerDto.password, 10);
+
+    const customer = this.customersRepository.create({... createCustomerDto, password: hashedPassword,});
     return this.customersRepository.save(customer);
   }
 
