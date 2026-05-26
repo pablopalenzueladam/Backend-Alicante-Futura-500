@@ -11,7 +11,7 @@ export class CreateBusinessDto {
   address:string;
 
   @ApiProperty({example: '03010'})
-  @IsString
+  @IsString()
   zipcode: string;
 
   @ApiProperty({ example: 'lococarioco@mongo.db' })
