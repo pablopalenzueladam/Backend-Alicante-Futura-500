@@ -6,6 +6,10 @@ export class CreateCustomerDto {
   @IsString()
   name: string;
 
+  @ApiProperty({example: 1234})
+  @IsString()
+  password: string;
+
   @ApiProperty({ example: 'lococarioco@mongo.db' })
   @IsEmail()
   email: string;

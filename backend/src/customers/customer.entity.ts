@@ -12,11 +12,15 @@ export class Customer {
   @Column({ unique: true })
   email!: string;
 
+   @Column ()
+   password!: string;
+
   @Column({ nullable: true, unique: true })
   phone!: string;
 
   @Column({ nullable: true })
   businessId!: number;
+
 
   @OneToMany(() => Appointment, (appointment) => appointment.customer)
   appointments!: Appointment[];
