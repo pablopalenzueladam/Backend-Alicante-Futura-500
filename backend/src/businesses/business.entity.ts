@@ -1,5 +1,6 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Appointment } from '../appointments/appointment.entity';
+import { Service } from '../services/service.entity';
 
 @Entity()
 export class Business {
@@ -12,15 +13,15 @@ export class Business {
   @Column({ unique: true })
   email!: string;
 
-  @Column({ })
+  @Column({ nullable: true })
   phone!: string;
 
-  @Column({ nullable: true })
-  service: string;
-
-  @Column({ nullable: true })
-  price: number;
+  @Column({ })
+  maxCustomers!: number;
 
   @OneToMany(() => Appointment, (appointment) => appointment.businessId)
   appointments!: Appointment[];
+
+  @OneToMany(() => Service, (service) => service.businessId)
+  services!: Service[];
 } 

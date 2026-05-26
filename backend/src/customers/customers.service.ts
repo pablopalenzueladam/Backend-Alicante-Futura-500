@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Customer } from './customers.entity';
+import { Customer } from './customer.entity';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { GetNextAppointment } from './dto/get-next-appointment';
 
 @Injectable()
 export class CustomersService {
@@ -52,7 +53,7 @@ export class CustomersService {
     return { message: `Cliente ${id} eliminado correctamente` };
   }
 
-  async getCustomerWithNextAppointment() {
+  async getNextAppointment() {
     const now = new Date();
 
     const customers = await this.customersRepository
