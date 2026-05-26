@@ -13,4 +13,8 @@ export class CreateServiceDto {
   @ApiProperty({ example: '66' })
   @IsNumber()
   durationMinutes?: number;
+
+  @ApiProperty({ example: '1' })
+  @IsNumber()
+  businessId: number;
 }
