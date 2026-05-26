@@ -9,6 +9,9 @@ export class Customer {
   @Column()
   name!: string;
 
+  @Column()
+  password!: string;
+
   @Column({ unique: true })
   email!: string;
 
