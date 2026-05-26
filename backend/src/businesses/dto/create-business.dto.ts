@@ -6,6 +6,14 @@ export class CreateBusinessDto {
   @IsString()
   name: string;
 
+  @ApiProperty({example:'Calle Conde Lumiares'})
+  @IsString()
+  address:string;
+
+  @ApiProperty({example: '03010'})
+  @IsString
+  zipcode: string;
+
   @ApiProperty({ example: 'lococarioco@mongo.db' })
   @IsEmail()
   email: string;

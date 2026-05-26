@@ -10,13 +10,19 @@ export class Business {
   @Column()
   name!: string;
 
+  @Column()
+  address!: string;
+
+  @Column()
+  zipcode!: string;
+
   @Column({ unique: true })
   email!: string;
 
   @Column({ nullable: true })
   phone!: string;
 
-  @Column({ })
+  @Column({ nullable: true})
   maxCustomers!: number;
 
   @OneToMany(() => Appointment, (appointment) => appointment.businessId)
