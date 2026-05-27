@@ -12,6 +12,11 @@ export class CustomersController {
     return this.customersService.findAll();
   }
 
+  @Get('next-appointment')
+  getNextAppointment() {
+    return this.customersService.getNextAppointment();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.customersService.findOne(+id);
@@ -31,9 +36,4 @@ export class CustomersController {
   remove(@Param('id') id: string) {
     return this.customersService.remove(+id);
   }
-
-  @Get()
-  getCustomers() {
-    return this.customersService.getNextAppointment();
-    }
 }

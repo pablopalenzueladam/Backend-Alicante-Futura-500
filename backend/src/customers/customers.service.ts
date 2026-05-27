@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Customer } from './customer.entity';
@@ -23,11 +23,21 @@ export class CustomersService {
     return this.customersRepository.findOneBy({ id });
   }
 
-  // Aquí la función de crear cliente, que hashea la contraseña que se introduzca
   async create(createCustomerDto: CreateCustomerDto) {
+    // Verificar que no existe ya un cliente con ese email
+    const existing = await this.customersRepository.findOne({
+      where: { email: createCustomerDto.email },
+    });
+    if (existing) {
+      throw new ConflictException(`Ya existe un usuario con el email "${createCustomerDto.email}"`);
+    }
+
     const hashedPassword = await bcrypt.hash(createCustomerDto.password, 10);
 
-    const customer = this.customersRepository.create({... createCustomerDto, password: hashedPassword,});
+    const customer = this.customersRepository.create({
+      ...createCustomerDto,
+      password: hashedPassword,
+    });
     return this.customersRepository.save(customer);
   }
 
@@ -36,6 +46,16 @@ export class CustomersService {
 
     if (!customer) {
       throw new NotFoundException(`No existe el cliente con id ${id}`);
+    }
+
+    // Si el DTO incluye una contraseña nueva, hashearla antes de guardar.
+    // Sin este paso, update() sobreescribe la contraseña en texto plano,
+    // rompiendo el login de ese usuario permanentemente.
+    if (updateCustomerDto.password) {
+      updateCustomerDto = {
+        ...updateCustomerDto,
+        password: await bcrypt.hash(updateCustomerDto.password, 10),
+      };
     }
 
     const updatedCustomer = this.customersRepository.merge(
@@ -62,14 +82,13 @@ export class CustomersService {
     const now = new Date();
 
     const customers = await this.customersRepository
-      .createQueryBuilder("customer")
-      .leftJoin("customer.appointment", "appointment")
-      .addSelect("MIN(appointment.date)", "nextAppointment")
-      .where("appointment.date > :now", { now })
-      .groupBy("customer.id")
+      .createQueryBuilder('customer')
+      .leftJoin('customer.appointment', 'appointment')
+      .addSelect('MIN(appointment.date)', 'nextAppointment')
+      .where('appointment.date > :now', { now })
+      .groupBy('customer.id')
       .getRawMany();
 
     return customers;
   }
-  
 }
