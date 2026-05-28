@@ -43,6 +43,7 @@ export class AuthService {
     const token = this.jwtService.sign({
       sub: user.id,
       email: user.email,
+      name: user.name,
     });
 
     this.logger.log(`Login correcto para el usuario "${email}" (id: ${user.id})`);
