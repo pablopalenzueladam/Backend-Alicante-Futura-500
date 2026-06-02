@@ -28,8 +28,7 @@ export class Appointment {
   @Column()
   customerId!: number;
 
-  @OneToOne(() => Customer, (customer) => customer.id)
-  @JoinColumn({ name: 'customerId' })
+  @ManyToOne(() => Customer, (customer) => customer.appointments)
   customer!: Customer;
 
   @Column()

@@ -1,7 +1,12 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { CustomerRole } from './customer.entity';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { UpdateRoleDto } from './dto/update-role.dto';
 
 @Controller('customers')
 export class CustomersController {
@@ -35,5 +40,12 @@ export class CustomersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.customersService.remove(+id);
+  }
+
+  @Patch(':id/role')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(CustomerRole.ADMIN)
+  updateRole(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
+    return this.customersService.updateRole(+id, updateRoleDto.role);
   }
 }

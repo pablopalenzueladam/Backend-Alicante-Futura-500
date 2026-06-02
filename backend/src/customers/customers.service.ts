@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Customer } from './customer.entity';
+import { Customer, CustomerRole } from './customer.entity';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { GetNextAppointment } from './dto/get-next-appointment';
@@ -90,5 +90,19 @@ export class CustomersService {
       .getRawMany();
 
     return customers;
+  }
+
+  async updateRole(id: number, newRole: CustomerRole) {
+    const customer = await this.customersRepository.findOneBy({ id });
+
+    if (!customer) {
+      throw new NotFoundException('No se encontró ningún usuario con el ID ${id}');
+    }
+
+    await this.customersRepository.update(id, { status: newRole });
+
+    return {
+      message: 'El rol del usuario con ID ${id} ha sido actualizado a [${newRole}] con éxito.',
+    }
   }
 }

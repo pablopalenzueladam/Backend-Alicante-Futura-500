@@ -1,6 +1,11 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Appointment } from '../appointments/appointment.entity';
 
+export enum CustomerRole {
+  USER = 'user',
+  ADMIN = 'admin',
+}
+
 @Entity()
 export class Customer {
   @PrimaryGeneratedColumn()
@@ -20,6 +25,13 @@ export class Customer {
 
   @Column()
   password!: string;
+
+  @Column({
+    type: 'text',
+    enum: CustomerRole,
+    default: CustomerRole.USER,
+    })
+  status!: CustomerRole;
 
   @OneToMany(() => Appointment, (appointment) => appointment.customer)
   appointments!: Appointment[];

@@ -1,27 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsArray, IsEmail, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-
-export class BusinessServiceDto {
-  @ApiProperty({ example: 'Corte de pelo' })
-  @IsString()
-  name: string;
-
-  @ApiProperty({ example: 25 })
-  @IsNumber()
-  price: number;
-}
+import { IsEmail, IsNumber,  IsOptional, IsString } from 'class-validator';
 
 export class CreateBusinessDto {
   @ApiProperty({ example: 'Negocio' })
   @IsString()
   name: string;
 
-  @ApiProperty({ example: 'Calle Conde Lumiares' })
+  @ApiProperty({example:'Calle Conde Lumiares'})
   @IsString()
-  address: string;
+  address:  string;
 
-  @ApiProperty({ example: '03010' })
+  @ApiProperty({example: '03010'})
   @IsString()
   zipcode: string;
 
@@ -34,14 +23,7 @@ export class CreateBusinessDto {
   @IsString()
   phone?: string;
 
-  @ApiProperty({ example: 3 })
+  @ApiProperty({ example: '3' })
   @IsNumber()
   maxCustomers?: number;
-
-  @ApiProperty({ type: [BusinessServiceDto] })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => BusinessServiceDto)
-  services?: BusinessServiceDto[];
 }
