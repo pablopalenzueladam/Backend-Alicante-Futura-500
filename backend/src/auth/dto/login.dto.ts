@@ -9,7 +9,7 @@ export class LoginDto {
   })
   @IsEmail({}, { message: 'El correo electrónico no es válido.' })
   @IsNotEmpty({ message: 'El correo es obligatorio.' })
-  email: string;
+  email!: string;
 
   @ApiProperty({
     example: '12345678',
@@ -18,5 +18,5 @@ export class LoginDto {
   @IsString()
   @IsNotEmpty({ message: 'La contraseña es obligatoria.' })
   @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres.' })
-  password: string;
+  password!: string;
 }

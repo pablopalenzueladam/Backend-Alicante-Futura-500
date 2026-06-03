@@ -99,7 +99,7 @@ export class CustomersService {
       throw new NotFoundException('No se encontró ningún usuario con el ID ${id}');
     }
 
-    await this.customersRepository.update(id, { status: newRole });
+    await this.customersRepository.update(id, { role: newRole });
 
     return {
       message: 'El rol del usuario con ID ${id} ha sido actualizado a [${newRole}] con éxito.',

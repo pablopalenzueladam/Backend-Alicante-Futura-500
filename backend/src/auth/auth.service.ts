@@ -44,6 +44,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       name: user.name,
+      role: user.role,
     });
 
     this.logger.log(`Login correcto para el usuario "${email}" (id: ${user.id})`);

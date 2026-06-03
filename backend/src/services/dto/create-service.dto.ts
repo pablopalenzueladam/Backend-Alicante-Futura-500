@@ -4,11 +4,11 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateServiceDto {
   @ApiProperty({ example: 'Gimnasia' })
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiProperty({ example: 25.99 })
   @IsNumber()
-  price: number;
+  price!: number;
 
   @ApiProperty({ example: '66', nullable: true })
   @IsOptional()

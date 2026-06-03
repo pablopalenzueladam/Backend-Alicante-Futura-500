@@ -7,19 +7,19 @@ import { Type } from 'class-transformer';
 export class CreateBusinessDto {
   @ApiProperty({ example: 'Negocio' })
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiProperty({example:'Calle Conde Lumiares'})
   @IsString()
-  address:  string;
+  address!:  string;
 
   @ApiProperty({example: '03010'})
   @IsString()
-  zipcode: string;
+  zipcode!: string;
 
   @ApiProperty({ example: 'lococarioco@mongo.db' })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiProperty({ example: '666 666 666' })
   @IsOptional()
@@ -35,5 +35,5 @@ export class CreateBusinessDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateServiceDto)
-  services: CreateServiceDto[];
+  services!: CreateServiceDto[];
 }

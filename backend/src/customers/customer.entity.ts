@@ -32,7 +32,7 @@ export class Customer {
     enum: CustomerRole,
     default: CustomerRole.USER,
     })
-  status!: CustomerRole;
+  role!: CustomerRole;
 
   @OneToMany(() => Appointment, (appointment) => appointment.customer)
   appointments!: Appointment[];
