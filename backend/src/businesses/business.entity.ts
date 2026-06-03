@@ -29,7 +29,7 @@ export class Business {
   @OneToMany(() => Appointment, (appointment) => appointment.businessId)
   appointments!: Appointment[];
 
-  @OneToMany(() => Service, (service) => service.businessId, {cascade: true})
+  @OneToMany(() => Service, (service) => service.business, {cascade: true})
   services!: Service[];
 
   @OneToOne(() => Customer, (customer) => customer.businessId)

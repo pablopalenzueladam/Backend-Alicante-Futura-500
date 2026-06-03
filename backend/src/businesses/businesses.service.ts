@@ -4,12 +4,15 @@ import { Repository } from 'typeorm';
 import { Business } from './business.entity';
 import { CreateBusinessDto } from './dto/create-business.dto';
 import { UpdateBusinessDto } from './dto/update-business.dto';
+import { Service } from '../services/service.entity';
 
 @Injectable()
 export class BusinessesService {
   constructor(
     @InjectRepository(Business)
     private readonly businessRepository: Repository<Business>,
+    @InjectRepository(Service)
+    private readonly serviceRepository: Repository<Service>,
   ) {}
 
   findAll() {
@@ -17,12 +20,31 @@ export class BusinessesService {
   }
 
   findOne(id: number) {
-    return this.businessRepository.findOneBy({ id });
+    return this.businessRepository.findOne({
+      where: { id },
+      relations: ['services'],
+    });
   }
 
-  create(createBusinessDto: CreateBusinessDto) {
-    const business = this.businessRepository.create(createBusinessDto);
-    return this.businessRepository.save(business);
+  async create(createBusinessDto: CreateBusinessDto) {
+    const { services, ...businessData } = createBusinessDto;
+
+    const business = this.businessRepository.create(businessData);
+    const savedBusiness = await this.businessRepository.save(business);
+
+    if(services?.length) {
+      await this.serviceRepository.save(
+        services.map((s) => ({
+          ...s,
+          business: savedBusiness,
+        }))
+      );
+    }
+
+    return this.businessRepository.findOne({
+      where: {id: savedBusiness.id},
+      relations: ['services'],
+    })
 }
 
   async update(id: number, updateBusinessDto: UpdateBusinessDto) {
