@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsEmail, IsNumber,  IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNumber,  IsOptional, IsString, IsArray, ValidateNested } from 'class-validator';
+import { Service } from '../../services/service.entity';
+import { CreateServiceDto } from 'src/services/dto/create-service.dto';
+import { Type } from 'class-transformer';
 
 export class CreateBusinessDto {
   @ApiProperty({ example: 'Negocio' })
@@ -25,5 +28,12 @@ export class CreateBusinessDto {
 
   @ApiProperty({ example: '3' })
   @IsNumber()
+  @IsOptional()
   maxCustomers?: number;
+
+  @ApiProperty({ type: [CreateServiceDto]})
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateServiceDto)
+  services: CreateServiceDto[];
 }

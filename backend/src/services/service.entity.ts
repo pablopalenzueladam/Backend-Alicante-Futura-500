@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, ManyToOne, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
+import { Column, Entity, OneToMany, ManyToOne, PrimaryGeneratedColumn, JoinColumn } from 'typeorm';
 import { Appointment } from '../appointments/appointment.entity';
 import { Business } from '../businesses/business.entity';
 
@@ -13,13 +13,14 @@ export class Service {
   @Column()
   price!: number;
 
-  @Column()
+  @Column({nullable: true})
   durationMinutes!: number;
 
-  @Column()
+  @Column( {nullable: true })
   businessId!: number;
 
-  @ManyToOne(() => Business, (business) => business.id)
+  @ManyToOne(() => Business, (business) => business.id, {onDelete: 'CASCADE'})
+  @JoinColumn( {name: 'businessId' })
   business!: Business;
   
   @OneToMany(() => Appointment, (appointment) => appointment.service)

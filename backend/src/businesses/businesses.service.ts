@@ -20,10 +20,10 @@ export class BusinessesService {
     return this.businessRepository.findOneBy({ id });
   }
 
-  create(createBusinessDto: CreateBusinessDto  ) {
+  create(createBusinessDto: CreateBusinessDto) {
     const business = this.businessRepository.create(createBusinessDto);
     return this.businessRepository.save(business);
-  }
+}
 
   async update(id: number, updateBusinessDto: UpdateBusinessDto) {
     const business = await this.businessRepository.findOneBy({ id });

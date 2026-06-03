@@ -1,6 +1,7 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Appointment } from '../appointments/appointment.entity';
 import { Service } from '../services/service.entity';
+import { Customer } from '../customers/customer.entity';
 
 @Entity()
 export class Business {
@@ -28,6 +29,9 @@ export class Business {
   @OneToMany(() => Appointment, (appointment) => appointment.businessId)
   appointments!: Appointment[];
 
-  @OneToMany(() => Service, (service) => service.businessId)
+  @OneToMany(() => Service, (service) => service.businessId, {cascade: true})
   services!: Service[];
+
+  @OneToOne(() => Customer, (customer) => customer.businessId)
+  customer!: Customer;
 } 

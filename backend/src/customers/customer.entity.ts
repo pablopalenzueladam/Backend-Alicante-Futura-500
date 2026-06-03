@@ -3,6 +3,7 @@ import { Appointment } from '../appointments/appointment.entity';
 
 export enum CustomerRole {
   USER = 'user',
+  
   ADMIN = 'admin',
 }
 
