@@ -1,146 +1,383 @@
-import { DataSource } from 'typeorm';
-import { Appointment, AppointmentStatus } from './appointments/appointment.entity';
-import { Customer } from './customers/customer.entity';
-import { Business } from './businesses/business.entity';
-import { Payment, PaymentStatus } from './payments/payments.entity';
-import { Service } from './services/service.entity';
+/**
+ * seed.ts
+ * Genera datos de prueba coherentes para la base de datos.
+ * Uso: npx tsx --tsconfig tsconfig.seed.json seed.ts
+ *
+ * Dependencias:
+ *   npm install @faker-js/faker bcryptjs better-sqlite3
+ *   npm install -D @types/better-sqlite3 @types/bcryptjs
+ */
 
-const AppDataSource = new DataSource({
-  type: 'sqlite',
-  database: 'data/database.sqlite',
-  entities: [Appointment, Customer, Business, Payment, Service],
-  synchronize: true,
-});
+import Database from "better-sqlite3";
+import { fakerES as faker } from "@faker-js/faker";
+import bcrypt from "bcryptjs";
 
-async function seed() {
-  await AppDataSource.initialize();
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const DB_PATH = "./data/database.sqlite";
+const TOTAL = 3000;
+faker.seed(42);
 
-  await AppDataSource.getRepository(Payment).clear();
-  await AppDataSource.getRepository(Appointment).clear();
-  await AppDataSource.getRepository(Customer).clear();
-  await AppDataSource.getRepository(Business).clear();
+// ─── TIPOS DE NEGOCIO + sus servicios coherentes ─────────────────────────────
+const BUSINESS_TYPES = [
+    {
+        category: "Peluquería",
+        services: [
+            { name: "Corte de pelo", price: 15, duration: 30 },
+            { name: "Tinte completo", price: 45, duration: 90 },
+            { name: "Mechas", price: 55, duration: 120 },
+            { name: "Peinado para evento", price: 35, duration: 60 },
+            { name: "Tratamiento keratina", price: 80, duration: 150 },
+            { name: "Corte y barba", price: 20, duration: 45 },
+        ],
+    },
+    {
+        category: "Centro de estética",
+        services: [
+            { name: "Manicura", price: 18, duration: 45 },
+            { name: "Pedicura", price: 22, duration: 60 },
+            { name: "Depilación piernas", price: 30, duration: 45 },
+            { name: "Limpieza facial", price: 40, duration: 60 },
+            { name: "Extensiones de pestañas", price: 50, duration: 90 },
+            { name: "Micropigmentación cejas", price: 120, duration: 120 },
+        ],
+    },
+    {
+        category: "Clínica dental",
+        services: [
+            { name: "Revisión y limpieza", price: 60, duration: 60 },
+            { name: "Empaste", price: 80, duration: 45 },
+            { name: "Ortodoncia invisible", price: 2500, duration: 30 },
+            { name: "Blanqueamiento dental", price: 150, duration: 90 },
+            { name: "Extracción muela del juicio", price: 120, duration: 60 },
+            { name: "Implante dental", price: 900, duration: 120 },
+        ],
+    },
+    {
+        category: "Taller mecánico",
+        services: [
+            { name: "Cambio de aceite", price: 45, duration: 30 },
+            { name: "Revisión ITV", price: 35, duration: 60 },
+            { name: "Cambio de frenos", price: 120, duration: 90 },
+            { name: "Diagnóstico electrónico", price: 50, duration: 45 },
+            { name: "Cambio de neumáticos", price: 80, duration: 60 },
+            { name: "Reparación motor", price: 500, duration: 240 },
+        ],
+    },
+    {
+        category: "Consulta médica",
+        services: [
+            { name: "Consulta general", price: 50, duration: 30 },
+            { name: "Analítica de sangre", price: 35, duration: 15 },
+            { name: "Ecografía abdominal", price: 80, duration: 30 },
+            { name: "Consulta dermatología", price: 70, duration: 30 },
+            { name: "Vacunación", price: 25, duration: 15 },
+            { name: "Electrocardiograma", price: 45, duration: 20 },
+        ],
+    },
+    {
+        category: "Gimnasio",
+        services: [
+            { name: "Sesión de personal trainer", price: 40, duration: 60 },
+            { name: "Clase de yoga", price: 15, duration: 60 },
+            { name: "Clase de spinning", price: 12, duration: 45 },
+            { name: "Evaluación física inicial", price: 30, duration: 60 },
+            { name: "Masaje deportivo", price: 55, duration: 60 },
+            { name: "Nutrición deportiva (consulta)", price: 60, duration: 45 },
+        ],
+    },
+    {
+        category: "Veterinaria",
+        services: [
+            { name: "Consulta general", price: 40, duration: 30 },
+            { name: "Vacunación antirrábica", price: 25, duration: 15 },
+            { name: "Esterilización", price: 150, duration: 120 },
+            { name: "Limpieza dental animal", price: 80, duration: 60 },
+            { name: "Microchip", price: 30, duration: 15 },
+            { name: "Análisis de sangre", price: 60, duration: 20 },
+        ],
+    },
+    {
+        category: "Psicología",
+        services: [
+            { name: "Primera consulta", price: 60, duration: 60 },
+            { name: "Sesión terapia individual", price: 55, duration: 50 },
+            { name: "Terapia de pareja", price: 80, duration: 60 },
+            { name: "Terapia infantil", price: 50, duration: 45 },
+            { name: "Evaluación psicológica", price: 120, duration: 90 },
+            { name: "EMDR (trauma)", price: 70, duration: 60 },
+        ],
+    },
+];
 
-  await AppDataSource.query(`DELETE FROM sqlite_sequence WHERE name='business'`);
-  await AppDataSource.query(`DELETE FROM sqlite_sequence WHERE name='customer'`);
-  await AppDataSource.query(`DELETE FROM sqlite_sequence WHERE name='appointment'`);
-  await AppDataSource.query(`DELETE FROM sqlite_sequence WHERE name='payment'`);
-
-  const businessesData = [
-    { name: 'Peluquería Nova', email: 'nova@peluqueria.es', phone: '965111001', address: 'Calle Mayor 10', zipcode: '03001', maxCustomers: 10 },
-    { name: 'Restaurante Marea', email: 'marea@restaurante.es', phone: '965111002', address: 'Avenida del Mar 5', zipcode: '03002', maxCustomers: 50 },
-    { name: 'Clínica Dental Sonrisa', email: 'sonrisa@dental.es', phone: '965111003', address: 'Calle Salud 3', zipcode: '03003', maxCustomers: 15 },
-    { name: 'Gimnasio FitZone', email: 'fitzone@gym.es', phone: '965111004', address: 'Avenida Deporte 8', zipcode: '03004', maxCustomers: 100 },
-    { name: 'Spa Relax', email: 'relax@spa.es', phone: '965111005', address: 'Calle Bienestar 2', zipcode: '03005', maxCustomers: 20 },
-    { name: 'Taller AutoPro', email: 'autopro@taller.es', phone: '965111006', address: 'Polígono Industrial 4', zipcode: '03006', maxCustomers: 8 },
-    { name: 'Academia English Plus', email: 'english@academia.es', phone: '965111007', address: 'Calle Idiomas 7', zipcode: '03007', maxCustomers: 30 },
-    { name: 'Clínica Fisio Move', email: 'move@fisio.es', phone: '965111008', address: 'Calle Movimiento 1', zipcode: '03008', maxCustomers: 12 },
-    { name: 'Fotografía Luz', email: 'luz@fotografia.es', phone: '965111009', address: 'Calle Arte 9', zipcode: '03009', maxCustomers: 5 },
-    { name: 'Barbería El Navajero', email: 'navajero@barberia.es', phone: '965111010', address: 'Calle Barba 6', zipcode: '03010', maxCustomers: 8 },
-    { name: 'Veterinaria Patitas', email: 'patitas@vet.es', phone: '965111011', address: 'Calle Animales 11', zipcode: '03011', maxCustomers: 20 },
-    { name: 'Centro Yoga Zen', email: 'zen@yoga.es', phone: '965111012', address: 'Calle Paz 12', zipcode: '03012', maxCustomers: 25 },
-    { name: 'Nutrición Vital', email: 'vital@nutricion.es', phone: '965111013', address: 'Calle Salud 13', zipcode: '03013', maxCustomers: 15 },
-    { name: 'Estudio Pilates Core', email: 'core@pilates.es', phone: '965111014', address: 'Avenida Cuerpo 14', zipcode: '03014', maxCustomers: 18 },
-    { name: 'Centro Estética Bella', email: 'bella@estetica.es', phone: '965111015', address: 'Calle Belleza 15', zipcode: '03015', maxCustomers: 10 },
-    { name: 'Tintorería Express', email: 'express@tintoreria.es', phone: '965111016', address: 'Calle Limpieza 16', zipcode: '03016', maxCustomers: 30 },
-    { name: 'Guardería Sol', email: 'sol@guarderia.es', phone: '965111017', address: 'Calle Infancia 17', zipcode: '03017', maxCustomers: 40 },
-    { name: 'Psicología Mente Sana', email: 'mente@psicologia.es', phone: '965111018', address: 'Calle Mente 18', zipcode: '03018', maxCustomers: 10 },
-    { name: 'Óptica Visión Clara', email: 'vision@optica.es', phone: '965111019', address: 'Calle Vista 19', zipcode: '03019', maxCustomers: 15 },
-    { name: 'Panadería El Horno', email: 'horno@panaderia.es', phone: '965111020', address: 'Calle Pan 20', zipcode: '03020', maxCustomers: 50 },
-    { name: 'Lavandería Blanca', email: 'blanca@lavanderia.es', phone: '965111021', address: 'Calle Blanca 21', zipcode: '03021', maxCustomers: 20 },
-    { name: 'Consultoría Legal Lex', email: 'lex@consultoria.es', phone: '965111022', address: 'Calle Derecho 22', zipcode: '03022', maxCustomers: 10 },
-    { name: 'Agencia Viajes Mundo', email: 'mundo@viajes.es', phone: '965111023', address: 'Avenida Viaje 23', zipcode: '03023', maxCustomers: 25 },
-    { name: 'Floristería Primavera', email: 'primavera@flores.es', phone: '965111024', address: 'Calle Flores 24', zipcode: '03024', maxCustomers: 15 },
-    { name: 'Clínica Acupuntura Chi', email: 'chi@acupuntura.es', phone: '965111025', address: 'Calle Chi 25', zipcode: '03025', maxCustomers: 8 },
-    { name: 'Escuela Danza Ritmo', email: 'ritmo@danza.es', phone: '965111026', address: 'Calle Baile 26', zipcode: '03026', maxCustomers: 35 },
-    { name: 'Taxi Rápido', email: 'rapido@taxi.es', phone: '965111027', address: 'Avenida Transporte 27', zipcode: '03027', maxCustomers: 5 },
-    { name: 'Mudanzas Pronto', email: 'pronto@mudanzas.es', phone: '965111028', address: 'Calle Carga 28', zipcode: '03028', maxCustomers: 5 },
-    { name: 'Cerrajería 24h', email: 'cerrajeria@24h.es', phone: '965111029', address: 'Calle Llave 29', zipcode: '03029', maxCustomers: 5 },
-    { name: 'Electricista Chispa', email: 'chispa@electricista.es', phone: '965111030', address: 'Calle Corriente 30', zipcode: '03030', maxCustomers: 5 },
-  ];
-
-  const businesses: Business[] = [];
-  for (const b of businessesData) {
-    const business = await AppDataSource.getRepository(Business).save(b);
-    businesses.push(business);
-  }
-
-  const customersData = [
-    { name: 'María López', email: 'maria@gmail.com', phone: '600000001', password: '123456' },
-    { name: 'Carlos Pérez', email: 'carlos@gmail.com', phone: '600000002', password: '123456' },
-    { name: 'Ana García', email: 'ana@gmail.com', phone: '600000003', password: '123456' },
-    { name: 'Juan Martínez', email: 'juan@gmail.com', phone: '600000004', password: '123456' },
-    { name: 'Laura Sánchez', email: 'laura@gmail.com', phone: '600000005', password: '123456' },
-    { name: 'Pedro Romero', email: 'pedro@gmail.com', phone: '600000006', password: '123456' },
-    { name: 'Sofía Torres', email: 'sofia@gmail.com', phone: '600000007', password: '123456' },
-    { name: 'Miguel Flores', email: 'miguel@gmail.com', phone: '600000008', password: '123456' },
-    { name: 'Elena Ruiz', email: 'elena@gmail.com', phone: '600000009', password: '123456' },
-    { name: 'David Moreno', email: 'david@gmail.com', phone: '600000010', password: '123456' },
-    { name: 'Isabel Jiménez', email: 'isabel@gmail.com', phone: '600000011', password: '123456' },
-    { name: 'Antonio Díaz', email: 'antonio@gmail.com', phone: '600000012', password: '123456' },
-    { name: 'Carmen Álvarez', email: 'carmen@gmail.com', phone: '600000013', password: '123456' },
-    { name: 'Francisco Muñoz', email: 'francisco@gmail.com', phone: '600000014', password: '123456' },
-    { name: 'Lucía Gutiérrez', email: 'lucia@gmail.com', phone: '600000015', password: '123456' },
-    { name: 'Javier Hernández', email: 'javier@gmail.com', phone: '600000016', password: '123456' },
-    { name: 'Marta Vargas', email: 'marta@gmail.com', phone: '600000017', password: '123456' },
-    { name: 'Roberto Castro', email: 'roberto@gmail.com', phone: '600000018', password: '123456' },
-    { name: 'Patricia Ramos', email: 'patricia@gmail.com', phone: '600000019', password: '123456' },
-    { name: 'Alejandro Molina', email: 'alejandro@gmail.com', phone: '600000020', password: '123456' },
-    { name: 'Cristina Ortega', email: 'cristina@gmail.com', phone: '600000021', password: '123456' },
-    { name: 'Fernando Gil', email: 'fernando@gmail.com', phone: '600000022', password: '123456' },
-    { name: 'Raquel Serrano', email: 'raquel@gmail.com', phone: '600000023', password: '123456' },
-    { name: 'Sergio Blanco', email: 'sergio@gmail.com', phone: '600000024', password: '123456' },
-    { name: 'Natalia Reyes', email: 'natalia@gmail.com', phone: '600000025', password: '123456' },
-    { name: 'Víctor Mendoza', email: 'victor@gmail.com', phone: '600000026', password: '123456' },
-    { name: 'Beatriz Suárez', email: 'beatriz@gmail.com', phone: '600000027', password: '123456' },
-    { name: 'Óscar Iglesias', email: 'oscar@gmail.com', phone: '600000028', password: '123456' },
-    { name: 'Silvia Cano', email: 'silvia@gmail.com', phone: '600000029', password: '123456' },
-    { name: 'Rubén Peña', email: 'ruben@gmail.com', phone: '600000030', password: '123456' },
-  ];
-
-  const customers: Customer[] = [];
-  for (let i = 0; i < customersData.length; i++) {
-    const customer = await AppDataSource.getRepository(Customer).save({
-      ...customersData[i],
-      businessId: businesses[i % businesses.length].id,
-    });
-    customers.push(customer);
-  }
-
-  const serviceNames = ['Corte de pelo', 'Menú del día', 'Revisión dental', 'Clase de yoga', 'Masaje relajante', 'Cambio de aceite', 'Clase de inglés', 'Sesión de fisio', 'Sesión de fotos', 'Arreglo de barba'];
-  const statuses = [AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED, AppointmentStatus.PENDING];
-
-  const appointments: Appointment[] = [];
-  for (let i = 0; i < 30; i++) {
-    const day = String(i + 1).padStart(2, '0');
-    const hour = (9 + (i % 8)).toString().padStart(2, '0');
-    const appointment = await AppDataSource.getRepository(Appointment).save({
-      date: `2026-06-${day}`,
-      time: `${hour}:00`,
-      status: statuses[i % statuses.length],
-      customerId: customers[i].id,
-      businessId: businesses[i % businesses.length].id,
-      serviceName: serviceNames[i % serviceNames.length],
-    });
-    appointments.push(appointment);
-  }
-
-  const paymentStatuses = [PaymentStatus.COMPLETED, PaymentStatus.PENDING, PaymentStatus.COMPLETED];
-  const amounts = [25, 40, 60, 80, 35, 50, 90, 20, 75, 45];
-
-  for (let i = 0; i < 30; i++) {
-    await AppDataSource.getRepository(Payment).save({
-      appointmentId: appointments[i].id,
-      customerId: customers[i].id,
-      amount: amounts[i % amounts.length],
-      status: paymentStatuses[i % paymentStatuses.length],
-    });
-  }
-
-  console.log('✅ Seed completado con 30 negocios, 30 clientes, 30 citas y 30 pagos!');
-  await AppDataSource.destroy();
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function weightedStatus(statuses: string[], weights: number[]): string {
+    const total = weights.reduce((a, b) => a + b, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < statuses.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return statuses[i];
+    }
+    return statuses[statuses.length - 1];
 }
 
-seed().catch((err) => {
-  console.error('❌ Error en seed:', err);
-  process.exit(1);
+function randomDate(start: Date, end: Date): string {
+    const d = faker.date.between({ from: start, to: end });
+    return d.toISOString().split("T")[0];
+}
+
+function randomTime(): string {
+    const h = faker.number.int({ min: 8, max: 20 });
+    const m = faker.helpers.arrayElement([0, 15, 30, 45]);
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+function randomPhone(): string {
+    const prefix = faker.helpers.arrayElement(["6", "7"]);
+    const rest = Array.from({ length: 8 }, () => faker.number.int({ min: 0, max: 9 })).join("");
+    return `${prefix}${rest}`;
+}
+
+// ─── MAIN ─────────────────────────────────────────────────────────────────────
+const db = new Database(DB_PATH);
+db.pragma("journal_mode = WAL");
+db.pragma("foreign_keys = ON");
+
+// ── 1. NEGOCIOS ───────────────────────────────────────────────────────────────
+console.log("🏪 Insertando negocios...");
+
+const insertBusiness = db.prepare(`
+  INSERT INTO business (name, address, zipcode, email, phone, maxCustomers)
+  VALUES (@name, @address, @zipcode, @email, @phone, @maxCustomers)
+`);
+
+const insertedBusinesses: { id: number; typeIdx: number }[] = [];
+
+const insertManyBusinesses = db.transaction(() => {
+    for (let i = 0; i < TOTAL; i++) {
+        const typeIdx = i % BUSINESS_TYPES.length;
+        const cat = BUSINESS_TYPES[typeIdx].category;
+        const name = `${cat} ${faker.person.lastName()} - ${faker.location.city()}`;
+
+        const result = insertBusiness.run({
+            name,
+            address: faker.location.streetAddress(),
+            zipcode: faker.location.zipCode("#####"),
+            email: `negocio_${i}_${faker.internet.email().toLowerCase()}`,
+            phone: randomPhone(),
+            maxCustomers: faker.number.int({ min: 1, max: 20 }),
+        });
+        insertedBusinesses.push({ id: result.lastInsertRowid as number, typeIdx });
+    }
 });
+insertManyBusinesses();
+console.log(`  ✅ ${TOTAL} negocios insertados`);
+
+// ── 2. SERVICIOS ──────────────────────────────────────────────────────────────
+console.log("🛠  Insertando servicios...");
+
+const insertService = db.prepare(`
+  INSERT INTO service (name, price, durationMinutes, businessId)
+  VALUES (@name, @price, @durationMinutes, @businessId)
+`);
+
+const businessServices: Map<number, { name: string; price: number }[]> = new Map();
+
+const insertManyServices = db.transaction(() => {
+    for (const { id, typeIdx } of insertedBusinesses) {
+        const pool = BUSINESS_TYPES[typeIdx].services;
+        const count = faker.number.int({ min: 2, max: pool.length });
+        const chosen = faker.helpers.shuffle([...pool]).slice(0, count);
+
+        const serviceList: { name: string; price: number }[] = [];
+        for (const svc of chosen) {
+            insertService.run({
+                name: svc.name,
+                price: svc.price,
+                durationMinutes: svc.duration,
+                businessId: id,
+            });
+            serviceList.push({ name: svc.name, price: svc.price });
+        }
+        businessServices.set(id, serviceList);
+    }
+});
+insertManyServices();
+console.log(`  ✅ Servicios insertados`);
+
+// ── 3. CLIENTES ───────────────────────────────────────────────────────────────
+console.log("👤 Insertando clientes...");
+
+const insertCustomer = db.prepare(`
+  INSERT INTO customer (name, email, phone, businessId, password, role)
+  VALUES (@name, @email, @phone, @businessId, @password, @role)
+`);
+
+const insertedCustomerIds: number[] = [];
+const passwordHash = bcrypt.hashSync("password123", 10);
+
+const insertManyCustomers = db.transaction(() => {
+    for (let i = 0; i < TOTAL; i++) {
+        const biz = faker.helpers.arrayElement(insertedBusinesses);
+        const result = insertCustomer.run({
+            name: faker.person.fullName(),
+            email: `cliente_${i}_${faker.internet.email().toLowerCase()}`,
+            phone: randomPhone(),
+            businessId: biz.id,
+            password: passwordHash,
+            role: "user",
+        });
+        insertedCustomerIds.push(result.lastInsertRowid as number);
+    }
+});
+insertManyCustomers();
+console.log(`  ✅ ${TOTAL} clientes insertados`);
+
+// ── 4. CITAS ──────────────────────────────────────────────────────────────────
+console.log("📅 Insertando citas...");
+
+const insertAppointment = db.prepare(`
+  INSERT INTO appointment (date, time, status, customerId, businessId, serviceName, serviceId)
+  VALUES (@date, @time, @status, @customerId, @businessId, @serviceName, @serviceId)
+`);
+
+const insertedAppointmentIds: number[] = [];
+const appointmentAmounts: Map<number, number> = new Map();
+
+const insertManyAppointments = db.transaction(() => {
+    for (let i = 0; i < TOTAL; i++) {
+        const biz = faker.helpers.arrayElement(insertedBusinesses);
+        const services = businessServices.get(biz.id) ?? [{ name: "Servicio general", price: 30 }];
+        const svc = faker.helpers.arrayElement(services);
+        const customerId = faker.helpers.arrayElement(insertedCustomerIds);
+
+        const status = weightedStatus(["pending", "confirmed", "cancelled", "completed"], [20, 50, 10, 20]);
+        const isPast = status === "completed" || status === "cancelled";
+
+        const date = isPast
+            ? randomDate(new Date("2024-01-01"), new Date())
+            : randomDate(new Date(), new Date("2026-12-31"));
+
+        const result = insertAppointment.run({
+            date,
+            time: randomTime(),
+            status,
+            customerId,
+            businessId: biz.id,
+            serviceName: svc.name,
+            serviceId: null,
+        });
+
+        const appointmentId = result.lastInsertRowid as number;
+        insertedAppointmentIds.push(appointmentId);
+        appointmentAmounts.set(appointmentId, svc.price);
+    }
+});
+insertManyAppointments();
+console.log(`  ✅ ${TOTAL} citas insertadas`);
+
+// ── 5. PAGOS ──────────────────────────────────────────────────────────────────
+console.log("💳 Insertando pagos...");
+
+const insertPayment = db.prepare(`
+  INSERT INTO payment (appointmentId, customerId, amount, status, createdAt)
+  VALUES (@appointmentId, @customerId, @amount, @status, @createdAt)
+`);
+
+const getAppointment = db.prepare("SELECT customerId, status, businessId FROM appointment WHERE id = ?");
+
+const insertManyPayments = db.transaction(() => {
+    for (const apptId of insertedAppointmentIds) {
+        const appt = getAppointment.get(apptId) as { customerId: number; status: string };
+        const amount = appointmentAmounts.get(apptId) ?? 30;
+
+        let paymentStatus: string;
+        if (appt.status === "completed") {
+            paymentStatus = faker.helpers.weightedArrayElement([
+                { weight: 90, value: "paid" },
+                { weight: 10, value: "refunded" },
+            ]);
+        } else if (appt.status === "cancelled") {
+            paymentStatus = faker.helpers.weightedArrayElement([
+                { weight: 60, value: "refunded" },
+                { weight: 40, value: "failed" },
+            ]);
+        } else if (appt.status === "confirmed") {
+            paymentStatus = faker.helpers.weightedArrayElement([
+                { weight: 70, value: "paid" },
+                { weight: 30, value: "pending" },
+            ]);
+        } else {
+            paymentStatus = faker.helpers.weightedArrayElement([
+                { weight: 60, value: "pending" },
+                { weight: 40, value: "failed" },
+            ]);
+        }
+
+        insertPayment.run({
+            appointmentId: apptId,
+            customerId: appt.customerId,
+            amount,
+            status: paymentStatus,
+            createdAt: faker.date
+                .between({ from: new Date("2024-01-01"), to: new Date() })
+                .toISOString()
+                .replace("T", " ")
+                .slice(0, 19),
+        });
+    }
+});
+insertManyPayments();
+console.log(`  ✅ ${TOTAL} pagos insertados`);
+
+// ── 6. RESEÑAS ────────────────────────────────────────────────────────────────
+console.log("⭐ Insertando reseñas...");
+
+const insertReview = db.prepare(`
+  INSERT INTO review (rating, comment, customerId, businessId, createdAt)
+  VALUES (@rating, @comment, @customerId, @businessId, @createdAt)
+`);
+
+const reviewComments: Record<number, string[]> = {
+    5: ["Excelente servicio, muy profesionales.", "Volveré sin duda, todo perfecto.", "El mejor sitio de la zona, 100% recomendado.", "Increíble atención y resultados espectaculares."],
+    4: ["Muy buena experiencia en general.", "Buen servicio, aunque el tiempo de espera fue algo largo.", "Profesionales y amables, repetiré.", "Muy satisfecho, solo mejoraría el aparcamiento."],
+    3: ["Servicio correcto, nada especial.", "Cumple lo que promete pero sin más.", "Precio algo elevado para lo que ofrecen.", "Normal, ni bien ni mal."],
+    2: ["Esperaba más por el precio.", "El trato fue algo frío.", "No volveré, hay mejores opciones.", "Tardaron mucho y el resultado fue mediocre."],
+    1: ["Muy mala experiencia, no lo recomiendo.", "Pésimo servicio, tuve que volver para que lo arreglaran.", "No volvería ni regalado.", "Fatal, tiempo de espera eterno y mal resultado."],
+};
+
+const completedAppointments = insertedAppointmentIds.filter((id) => {
+    const a = getAppointment.get(id) as { status: string };
+    return a.status === "completed";
+});
+
+const insertManyReviews = db.transaction(() => {
+    for (const apptId of completedAppointments) {
+        if (Math.random() > 0.4) continue;
+        const appt = getAppointment.get(apptId) as { customerId: number; businessId: number; status: string };
+
+        const rating = faker.helpers.weightedArrayElement([
+            { weight: 5, value: 1 },
+            { weight: 10, value: 2 },
+            { weight: 20, value: 3 },
+            { weight: 35, value: 4 },
+            { weight: 30, value: 5 },
+        ]);
+
+        insertReview.run({
+            rating,
+            comment: faker.helpers.arrayElement(reviewComments[rating]),
+            customerId: appt.customerId,
+            businessId: appt.businessId,
+            createdAt: faker.date
+                .between({ from: new Date("2024-01-01"), to: new Date() })
+                .toISOString()
+                .replace("T", " ")
+                .slice(0, 19),
+        });
+    }
+});
+insertManyReviews();
+console.log(`  ✅ Reseñas insertadas`);
+
+db.close();
+console.log("\n🎉 Seed completado con éxito.");
