@@ -17,7 +17,7 @@ export class CustomersController {
     return this.customersService.findAll();
   }
 
-  @Get('next-appointment')
+  @Get('with-next-appointment')
   getNextAppointment() {
     return this.customersService.getNextAppointment();
   }

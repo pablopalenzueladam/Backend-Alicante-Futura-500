@@ -81,15 +81,21 @@ export class CustomersService {
   async getNextAppointment() {
     const now = new Date();
 
-    const customers = await this.customersRepository
+    const rawCustomers = await this.customersRepository
       .createQueryBuilder('customer')
-      .leftJoin('customer.appointment', 'appointment')
-      .addSelect('MIN(appointment.date)', 'nextAppointment')
-      .where('appointment.date > :now', { now })
-      .groupBy('customer.id')
-      .getRawMany();
+      .leftJoin('customer.appointments', 'appointment', 'appointment.date > :now', {now})
+      .select([
+      'customer.id AS id',
+      'customer.name AS name',
+      'customer.email AS email',
+      'customer.phone AS phone',
+      'customer.businessId AS businessId'
+    ])
+    .addSelect('MIN(appointment.date)', 'nextAppointment')
+    .groupBy('customer.id')
+    .getRawMany();
 
-    return customers;
+    return rawCustomers;
   }
 
   async updateRole(id: number, newRole: CustomerRole) {
