@@ -35,16 +35,16 @@ export class Appointment {
   businessId!: number;
 
   @Column({
-  type: 'varchar',
-  length: 100, 
-  nullable: true,
-  default: null
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+    default: null
   })
   serviceName?: string;
-  
-  @ManyToOne(() => Service, (service) => service.name)
+
+  @ManyToOne(() => Service, (service) => service.appointments)
   @JoinColumn({ name: 'serviceId' })
   service!: Service;
 
-  
+
 }
