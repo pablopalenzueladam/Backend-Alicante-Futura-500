@@ -10,10 +10,11 @@ export class PaymentsService {
   constructor(
     @InjectRepository(Payment)
     private readonly paymentsRepository: Repository<Payment>,
-  ) {}
-
+  ) { }
   findAll() {
-    return this.paymentsRepository.find();
+    return this.paymentsRepository.find({
+      relations: ['customer', 'appointment'],
+    });
   }
 
   findOne(id: number) {
