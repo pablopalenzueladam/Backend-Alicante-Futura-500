@@ -16,8 +16,8 @@ export class BusinessesService {
   ) {}
 
   findAll() {
-    return this.businessRepository.find();
-  }
+  return this.businessRepository.find({ relations: ['services'] });
+}
 
   findOne(id: number) {
     return this.businessRepository.findOne({
