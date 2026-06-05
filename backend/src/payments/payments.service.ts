@@ -13,7 +13,7 @@ export class PaymentsService {
   ) { }
   findAll() {
     return this.paymentsRepository.find({
-      relations: ['customer', 'appointment'],
+      relations: ['customer'],
     });
   }
 
