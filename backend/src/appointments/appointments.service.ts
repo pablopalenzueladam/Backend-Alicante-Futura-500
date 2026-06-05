@@ -10,10 +10,11 @@ export class AppointmentsService {
   constructor(
     @InjectRepository(Appointment)
     private readonly appointmentsRepository: Repository<Appointment>,
-  ) {}
+  ) { }
 
   findAll() {
     return this.appointmentsRepository.find({
+      relations: ['customer'],
       order: { date: 'ASC', time: 'ASC' },
     });
   }
