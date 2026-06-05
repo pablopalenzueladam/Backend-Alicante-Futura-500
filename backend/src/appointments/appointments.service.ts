@@ -12,12 +12,12 @@ export class AppointmentsService {
     private readonly appointmentsRepository: Repository<Appointment>,
   ) { }
 
-  findAll() {
-    return this.appointmentsRepository.find({
-      relations: ['customer'],
-      order: { date: 'ASC', time: 'ASC' },
-    });
-  }
+ findAll() {
+  return this.appointmentsRepository.find({
+    relations: ['customer'],
+    order: { id: 'ASC' },
+  });
+}
 
   findOne(id: number) {
     return this.appointmentsRepository.findOneBy({ id });
